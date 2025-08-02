@@ -1,1 +1,689 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLAM Pipeline Visualization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a5699, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(13, 27, 42, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #0c1a2d, #1c3a5f);
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 3px solid #4a6fa5;
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            color: #64b5f6;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: #bbdefb;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .pipeline-container {
+            padding: 40px;
+        }
+        
+        .pipeline-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .pipeline-header h2 {
+            font-size: 2.5rem;
+            color: #64b5f6;
+            margin-bottom: 20px;
+        }
+        
+        .pipeline-header p {
+            font-size: 1.2rem;
+            color: #bbdefb;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            display: flex;
+            margin-bottom: 60px;
+            background: rgba(26, 48, 77, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .step:hover {
+            transform: translateY(-5px);
+        }
+        
+        .step-number {
+            background: linear-gradient(to bottom, #4a6fa5, #2a5699);
+            width: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e0f7fa;
+        }
+        
+        .step-content {
+            padding: 30px;
+            flex: 1;
+        }
+        
+        .step-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .step-title i {
+            font-size: 2rem;
+            margin-right: 15px;
+            color: #64b5f6;
+        }
+        
+        .step-title h3 {
+            font-size: 1.8rem;
+            color: #bbdefb;
+        }
+        
+        .step-details {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .step-description {
+            flex: 1;
+        }
+        
+        .step-description p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #e0f7fa;
+        }
+        
+        .step-diagram {
+            flex: 1;
+            background: rgba(13, 27, 42, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .step-diagram-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #bbdefb;
+            text-align: center;
+        }
+        
+        .diagram-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #1a3a5f, #2a5699);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #bbdefb;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tech-tag {
+            background: linear-gradient(to right, #64b5f6, #42a5f5);
+            color: #0c1a2d;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .why-important {
+            background: rgba(26, 48, 77, 0.9);
+            border-left: 4px solid #64b5f6;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .why-important h4 {
+            color: #64b5f6;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .why-important h4 i {
+            margin-right: 10px;
+        }
+        
+        .pipeline-flow {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            padding: 20px;
+        }
+        
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin: 0 15px;
+        }
+        
+        .flow-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(to bottom, #4a6fa5, #2a5699);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            z-index: 2;
+        }
+        
+        .flow-label {
+            font-weight: bold;
+            color: #bbdefb;
+            text-align: center;
+            max-width: 120px;
+        }
+        
+        .flow-connector {
+            position: absolute;
+            top: 35px;
+            right: -30px;
+            width: 30px;
+            height: 3px;
+            background: #4a6fa5;
+        }
+        
+        .flow-connector::after {
+            content: "→";
+            position: absolute;
+            right: -15px;
+            top: -12px;
+            font-size: 1.5rem;
+            color: #64b5f6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(10, 20, 35, 0.9);
+            border-top: 1px solid #2a5699;
+        }
+        
+        .performance-highlights {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .highlight {
+            background: rgba(26, 48, 77, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            min-width: 250px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .highlight-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #64b5f6;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-label {
+            font-size: 1.1rem;
+            color: #bbdefb;
+        }
+        
+        @media (max-width: 900px) {
+            .step-details {
+                flex-direction: column;
+            }
+            
+            .pipeline-flow {
+                flex-wrap: wrap;
+            }
+            
+            .flow-step {
+                margin: 15px;
+            }
+            
+            .flow-connector {
+                display: none;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SLAM Pipeline</h1>
+            <p class="subtitle">Semantic and Geometric RGB-D Visual SLAM with Line Features for Dynamic Environments</p>
+        </header>
+        
+        <div class="pipeline-container">
+            <div class="pipeline-header">
+                <h2>Step-by-Step Processing Pipeline</h2>
+                <p>This visualization details each stage of the SLAM Pipelinesystem, explaining how it handles dynamic environments through semantic segmentation, geometric constraints, and line feature integration.</p>
+            </div>
+            
+            <!-- Pipeline Flow Visualization -->
+            <div class="pipeline-flow">
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="flow-label">Input</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="flow-label">Semantic Segmentation</div>
+                    <div class="flow-connector"></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <div class="flow-label">Dynamic Removal</div>
+                    <div class="flow-connector"></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="flow-label">Feature Extraction</div>
+                    <div class="flow-connector"></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-location-arrow"></i>
+                    </div>
+                    <div class="flow-label">Tracking</div>
+                    <div class="flow-connector"></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-map"></i>
+                    </div>
+                    <div class="flow-label">Mapping</div>
+                    <div class="flow-connector"></div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="flow-label">Output</div>
+                </div>
+            </div>
+            
+            <!-- Performance Highlights -->
+            <div class="performance-highlights">
+                <div class="highlight">
+                    <div class="highlight-value">98.33%</div>
+                    <div class="highlight-label">ATE Reduction vs ORB-SLAM2</div>
+                </div>
+                <div class="highlight">
+                    <div class="highlight-value">96%</div>
+                    <div class="highlight-label">Tracking Success Rate</div>
+                </div>
+                <div class="highlight">
+                    <div class="highlight-value">38ms</div>
+                    <div class="highlight-label">Per Frame Processing</div>
+                </div>
+                <div class="highlight">
+                    <div class="highlight-value">2×</div>
+                    <div class="highlight-label">Robustness in Dynamic Scenes</div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Input -->
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-camera"></i>
+                        <h3>Input: RGB-D Frames</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>The system takes synchronized RGB-D frames as input. Each frame consists of:</p>
+                            <p><strong>RGB Image</strong>: Color information (640×480 pixels) providing texture and appearance data.</p>
+                            <p><strong>Depth Image</strong>: Per-pixel depth measurements aligned with RGB data, enabling 3D reconstruction.</p>
+                            <p><strong>Timestamp</strong>: For temporal synchronization between frames and with other sensors.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>RGB-D sensors provide both visual appearance and geometric information, enabling more robust 3D perception than RGB-only systems. Depth data is essential for accurate scale estimation in monocular SLAM.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">RGB-D Input Visualization</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>RGB Image + Depth Map</p>
+                                    <p>Timestamp: 1305031452.791720</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">RGB-D Sensor</div>
+                                <div class="tech-tag">Frame Sync</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Semantic Segmentation -->
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-brain"></i>
+                        <h3>Semantic Segmentation</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>Identifies and segments dynamic objects using deep learning models:</p>
+                            <p><strong>YOLOv8 Detection</strong>: Detects potential dynamic objects (people, vehicles) and outputs bounding boxes with confidence scores. Filters low-confidence detections (&lt;0.7).</p>
+                            <p><strong>SAM2 Segmentation</strong>: Uses bounding boxes as prompts to generate pixel-accurate masks. SAM2's transformer architecture enables zero-shot generalization to unseen objects.</p>
+                            <p><strong>Propagation Strategy</strong>: Efficiently handles new objects entering the scene by triggering new segmentation when detection confidence exceeds threshold.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>Semantic segmentation provides prior knowledge about dynamic elements, allowing the system to proactively remove features that would corrupt the map and trajectory estimation. The YOLOv8 + SAM2 combination achieves high precision with real-time performance.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">Segmentation Process</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>YOLOv8 → Bounding Boxes → SAM2 → Masks</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">YOLOv8</div>
+                                <div class="tech-tag">SAM2</div>
+                                <div class="tech-tag">Zero-shot</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Dynamic Feature Removal -->
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-filter"></i>
+                        <h3>Dynamic Feature Removal</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>Two-stage approach to eliminate dynamic features:</p>
+                            <p><strong>Semantic Mask Filtering</strong>: Discards ORB features inside SAM2 masks using: 
+                            <code>features = [f for f in features if not mask[f.position]]</code></p>
+                            <p><strong>Epipolar Geometric Constraints</strong>: Computes fundamental matrix using RANSAC and calculates point-to-epipolar-line distance:
+                            <br><code>d = |x'ᵀ F x| / √(a² + b²)</code>
+                            <br>Features with d > 2.0px are classified as dynamic.</p>
+                            <p><strong>Validation</strong>: Cross-validates results from both methods for robust filtering.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>While semantic filtering handles known dynamic objects, geometric constraints catch unexpected motion (e.g., moved furniture). This dual approach ensures robustness against both anticipated and unanticipated dynamic elements.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">Epipolar Geometry</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>Static Points: On epipolar line</p>
+                                    <p>Dynamic Points: Deviate significantly</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">RANSAC</div>
+                                <div class="tech-tag">Epipolar Geometry</div>
+                                <div class="tech-tag">Optical Flow</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: Feature Extraction -->
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-search"></i>
+                        <h3>Feature Extraction</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>Extracts robust features from static regions:</p>
+                            <p><strong>ORB Point Features</strong>: Detects multiscale corners in static regions. Computes 256-bit BRIEF descriptors with orientation. Parameters: 1000 features/frame, pyramid levels=8.</p>
+                            <p><strong>EDLines</strong>: Detects line segments using edge grouping. Processes image pyramid (scale=1.2) for multiscale robustness. Outputs line endpoints (x₁,y₁,x₂,y₂).</p>
+                            <p><strong>Descriptor Computation</strong>: ORB features use oriented BRIEF descriptors. Lines use Line Band Descriptors (LBD) for robust matching.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>Line features provide structural constraints in texture-less areas where point features fail. The combination of points and lines ensures feature availability even when dynamic objects dominate the scene.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">Feature Visualization</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>ORB Points + Line Features</p>
+                                    <p>Extracted from static regions</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">ORB</div>
+                                <div class="tech-tag">EDLines</div>
+                                <div class="tech-tag">LBD</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 5: Tracking -->
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-location-arrow"></i>
+                        <h3>Tracking</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>Estimates camera pose through feature matching:</p>
+                            <p><strong>Feature Matching</strong>: Points are matched using FLANN with ratio test (0.8). Lines are matched using LBD descriptors with geometric validation. Rejects matches with Hamming distance > 50.</p>
+                            <p><strong>Pose Estimation</strong>: Solves Perspective-n-Point (PnP) problem using RANSAC:
+                            <br><code>min Σ ‖ π(K(RXᵢ + t)) - xᵢ ‖²</code>
+                            <br>Uses both points and lines as constraints.</p>
+                            <p><strong>Motion Prediction</strong>: Employs constant velocity model to initialize pose estimation and reduce search space.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>The combination of point and line features provides more constraints for pose estimation, especially when dynamic filtering reduces the number of available point features. This dual approach maintains tracking robustness in challenging conditions.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">Pose Estimation</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>Feature Matching → PnP with RANSAC</p>
+                                    <p>Point + Line Constraints</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">PnP</div>
+                                <div class="tech-tag">RANSAC</div>
+                                <div class="tech-tag">FLANN</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 6: Mapping -->
+            <div class="step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-map"></i>
+                        <h3>Mapping</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>Builds and optimizes the environment map:</p>
+                            <p><strong>Adaptive Bundle Adjustment</strong>: Joint optimization of points and lines with adaptive weighting:
+                            <br><code>α = 2^(-|Pₖ|/λ)  (λ=50)</code>
+                            <br>Cost function: 
+                            <br><code>E = Σ e_point + αΣ(e_line²ᴰ + e_line³ᴰ)</code></p>
+                            <p><strong>Map Optimization</strong>: Performs local BA in keyframes. Represents lines with 3D endpoints and Plücker coordinates.</p>
+                            <p><strong>Dense Reconstruction</strong>: Projects static pixels into 3D using depth data. Uses Truncated Signed Distance Function (TSDF) for surface reconstruction. Removes dynamic regions using semantic masks.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>The adaptive weighting balances the contribution of point and line features based on availability. When points are abundant, lines have less influence, reducing potential errors from line mismatches. In sparse point environments, line features compensate to maintain map quality.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">Bundle Adjustment</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>Adaptive Weighting</p>
+                                    <p>Point + Line Optimization</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">Bundle Adjustment</div>
+                                <div class="tech-tag">TSDF</div>
+                                <div class="tech-tag">Plücker</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 7: Output -->
+            <div class="step">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <i class="fas fa-download"></i>
+                        <h3>Output</h3>
+                    </div>
+                    <div class="step-details">
+                        <div class="step-description">
+                            <p>Final outputs of the SLAM system:</p>
+                            <p><strong>Camera Trajectory</strong>: 6-DoF camera poses over time in the format:
+                            <br><code>[timestamp, x, y, z, qx, qy, qz, qw]</code>
+                            <br>Saved as trajectory.txt for evaluation.</p>
+                            <p><strong>Dense 3D Map</strong>: Point cloud (PLY/PCD format) with dynamic objects removed:
+                            <br><code>point_cloud = point_cloud[static_mask]</code></p>
+                            <p><strong>Performance Metrics</strong>: Calculates Absolute Trajectory Error (ATE) and Relative Pose Error (RPE) for evaluation.</p>
+                            
+                            <div class="why-important">
+                                <h4><i class="fas fa-lightbulb"></i> Why this matters</h4>
+                                <p>The clean trajectory and dynamic-free map enable reliable navigation and environment interaction for autonomous systems. Performance metrics demonstrate the system's 98.33% improvement over ORB-SLAM2 in dynamic environments.</p>
+                            </div>
+                        </div>
+                        <div class="step-diagram">
+                            <div class="step-diagram-title">Output Visualization</div>
+                            <div class="diagram-placeholder">
+                                <div>
+                                    <p>Clean Trajectory</p>
+                                    <p>Dynamic-Free Map</p>
+                                </div>
+                            </div>
+                            <div class="tech-tags">
+                                <div class="tech-tag">PLY/PCD</div>
+                                <div class="tech-tag">ATE/RPE</div>
+                                <div class="tech-tag">Trajectory</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>SGL-SLAM: Semantic and Geometric RGB-D Visual SLAM Enhanced with Line Features for Dynamic Environments</p>
+            <p>Weihui Liao, Chao Li, Chengju Liu, Qijun Chen - Tongji University</p>
+        </footer>
+    </div>
+</body>
+</html>
